@@ -20,6 +20,6 @@ class IndexController extends Controller
             return "No Realm ID";
         }
         Schoology::authorize();
-        return view('app');
+        return view('app')->with('realm_id', $realm_id);
     }
 }

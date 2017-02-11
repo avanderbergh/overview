@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Jobs\GetStudentCompletions;
+use Maatwebsite\Excel\Facades\Excel;
 use Avanderbergh\Schoology\SchoologyApi;
 use Avanderbergh\Schoology\Facades\Schoology;
 
@@ -104,18 +105,31 @@ class StudentsController extends Controller
                         $grades = $schoology->apiResult(sprintf('sections/%s/grades?enrollment_id=%s',$section->id, $enrollment_id))->grades;
                     } catch (\Exception $e){
                     }
+                    $section_grades_total = 0;
+                    $section_grades_completed = 0;
                     foreach ($grades->grade as $grade){
-                        if ($grade->category_id) {$student['total_grades']++;}
-                        if ($grade->grade) {$student['completed_grades']++;}
+                        if ($grade->category_id) {
+                            $student['total_grades']++;
+                            $section_grades_total++;
+                        }
+                        if ($grade->grade) {
+                            $student['completed_grades']++;
+                            $section_grades_completed++;
+                        }
                     }
 
-                    if ($completion->completed && $student['completed_grades'] == $student['total_grades']){
+                    if ($completion->completed && $section_grades_total == $section_grades_completed){
                         $student['completed_sections']++;
                     }
                 }
                 $students[] = $student;
             }
         }
-        dd($students);
+
+        Excel::create('Overview', function($excel) use ($students){
+            $excel->sheet('Completions', function($sheet) use ($students){
+                $sheet->fromArray($students, null, 'A1', true);
+            });
+        })->download('xlsx');
     }
 }

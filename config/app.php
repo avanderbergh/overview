@@ -171,6 +171,7 @@ return [
         Avanderbergh\Schoology\SchoologyServiceProvider::class,
         Laracasts\Utilities\JavaScript\JavaScriptServiceProvider::class,
         Pvm\ArtisanBeans\ArtisanBeansServiceProvider::class,
+        Maatwebsite\Excel\ExcelServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -230,6 +231,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'Schoology' => Avanderbergh\Schoology\Facades\Schoology::class,
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
 
     ],
 

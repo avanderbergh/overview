@@ -11531,12 +11531,21 @@ __webpack_require__(36);
 Vue.component('student-list', __webpack_require__(46));
 
 var app = new Vue({
-  el: '#app',
-  data: {
-    search: null
-  },
-  mounted: function mounted() {},
-  methods: {}
+    el: '#app',
+    data: {
+        search: null,
+        downloadModal: {
+            show: false
+        }
+    },
+    mounted: function mounted() {},
+    methods: {
+        exportExcel: function exportExcel() {
+            axios.get('/api/groups/' + Overview.realm_id + '/students/export').then(function (response) {
+                window.location = response.data;
+            });
+        }
+    }
 });
 
 /***/ }),

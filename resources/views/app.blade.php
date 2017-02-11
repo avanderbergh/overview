@@ -9,6 +9,15 @@
     </head>
     <body>
         <div id="app">
+            <div class="modal" :class="{'is-active': downloadModal.show}">
+                <div v-on:click="downloadModal.show = false" class="modal-background"></div>
+                <div class="modal-card">
+                    <div class="modal-card-body has-text-centered">
+                        <p>The download will start automatically. Depending on the number of students and courses, the download might take a few minutes to start...</p>
+                    </div>
+                </div>
+                <button v-on:click="downloadModal.show = false" class="modal-close"></button>
+            </div>
             <nav class="nav has-shadow">
                 <div class="nav-left">
                     <a class="nav-item">
@@ -16,6 +25,11 @@
                     </a>
                 </div>
                 <div class="nav-right">
+                    <div class="nav-item">
+                        <a href="/api/groups/{{ $realm_id }}/students/export" v-on:click="downloadModal.show = true" class="button is-primary is-outlined" download>
+                            <i class="fa fa-file-excel-o" aria-hidden="true"></i> &nbsp;Export
+                        </a>
+                    </div>
                     <div class="nav-item">
                         <p class="control has-icon">
                             <input class="input" type="text" v-model="search" placeholder="Search">
