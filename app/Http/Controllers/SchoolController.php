@@ -53,6 +53,6 @@ class SchoolController extends Controller
             $admin->save();
             $admin = Admin::find($sgy_user->id);
         }
-        dd([$school, $admin]);
+        return view('config');
     }
 }
