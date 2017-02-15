@@ -27,7 +27,7 @@
                 <div class="nav-right">
                     <div class="nav-item">
                         <a href="/api/groups/{{ $realm_id }}/students/export" v-on:click="downloadModal.show = true" class="button is-primary is-outlined" download>
-                            <i class="fa fa-file-excel-o" aria-hidden="true"></i> &nbsp;Export
+
                         </a>
                     </div>
                     <div class="nav-item">
