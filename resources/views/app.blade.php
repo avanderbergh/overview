@@ -27,12 +27,12 @@
                 <div class="nav-right">
                     <div class="nav-item">
                         <a href="/api/groups/{{ $realm_id }}/students/export" v-on:click="downloadModal.show = true" class="button is-primary is-outlined" download>
-
+                            <i class="fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;Export
                         </a>
                     </div>
                     <div class="nav-item">
                         <p class="control has-icon">
-                            <input class="input" type="text" v-model="search" placeholder="Search">
+                            <input class="input" type="text" v-model="search" placeholder="search by name">
                             <span class="icon is-small">
                                 <i class="fa fa-user"></i>
                             </span>

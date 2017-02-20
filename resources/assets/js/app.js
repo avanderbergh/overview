@@ -19,18 +19,9 @@ const app = new Vue({
     el: '#app',
     data: {
         search: null,
+        gradYear: null,
         downloadModal: {
             show: false
-        }
-    },
-    mounted: function(){
-    },
-    methods: {
-        exportExcel() {
-            axios.get('/api/groups/'+Overview.realm_id+'/students/export')
-                .then(function (response) {
-                    window.location = response.data;
-                })
         }
     }
 });

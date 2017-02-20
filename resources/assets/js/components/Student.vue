@@ -10,6 +10,10 @@
                     </div>
                     <div class="media-content">
                         <p class="title is-4" v-text="student.name"></p>
+                        <p class="subtitle is-6" v-show="student.grad_year">
+                            <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+                            {{ student.grad_year }}
+                        </p>
                     </div>
                 </div>
                 <div class="content">

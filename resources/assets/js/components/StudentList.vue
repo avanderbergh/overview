@@ -1,5 +1,13 @@
 <template>
     <div class="container" style="padding-top:20px;">
+        <p class="control">
+            <span class="select">
+                <select v-model="searchYear">
+                    <option value="0">Graduation Year</option>
+                    <option v-for="year in gradYears">{{ year }}</option>
+                </select>
+            </span>
+        </p>
         <div class="has-text-centered" v-show="total_students < 1" style="padding-top:15em;">
             <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
         </div>
@@ -8,7 +16,7 @@
             <progress class="progress is-primary" :value="students.length" :max="total_students"></progress>
         </div>
         <div class="columns is-multiline is-mobile">
-            <student :number="filteredStudents.length" :student="student" v-for="student in filteredStudents"></student>
+            <student :number="filteredByGradYear.length" :student="student" v-for="student in filteredByGradYear"></student>
         </div>
     </div>
 </template>
@@ -20,6 +28,7 @@
         props: ['search'],
         data() {
             return {
+                searchYear: 0,
                 total_students: 0,
                 students: [],
             }
@@ -47,7 +56,7 @@
             'student': Student,
         },
         computed: {
-            filteredStudents() {
+            filteredByName() {
                 var self = this
                 if (!self.search) {
                     return self.students;
@@ -58,6 +67,27 @@
                     })
                 }
             },
+            filteredByGradYear() {
+                var self = this
+                if (!self.searchYear) {
+                    return self.filteredByName
+                } else {
+                    return self.filteredByName.filter(function (student) {
+                        return student.grad_year.indexOf(self.searchYear) !== -1
+                    })
+                }
+            },
+            gradYears() {
+                var years = [];
+                if (this.students) {
+                    this.students.forEach(function (student) {
+                        if (!years.includes(student.grad_year)) {
+                            years.push(student.grad_year);
+                        }
+                    });
+                }
+                return years.sort();
+            }
         }
     }
 </script>

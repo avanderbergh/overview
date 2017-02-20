@@ -11534,16 +11534,9 @@ var app = new Vue({
     el: '#app',
     data: {
         search: null,
+        gradYear: null,
         downloadModal: {
             show: false
-        }
-    },
-    mounted: function mounted() {},
-    methods: {
-        exportExcel: function exportExcel() {
-            axios.get('/api/groups/' + Overview.realm_id + '/students/export').then(function (response) {
-                window.location = response.data;
-            });
         }
     }
 });
@@ -12477,6 +12470,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = {
@@ -12520,12 +12517,21 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = {
     props: ['search'],
     data: function data() {
         return {
+            searchYear: 0,
             total_students: 0,
             students: []
         };
@@ -12554,7 +12560,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         'student': __WEBPACK_IMPORTED_MODULE_0__Student_vue___default.a
     },
     computed: {
-        filteredStudents: function filteredStudents() {
+        filteredByName: function filteredByName() {
             var self = this;
             if (!self.search) {
                 return self.students;
@@ -12564,6 +12570,27 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     return searchRegex.test(student.name);
                 });
             }
+        },
+        filteredByGradYear: function filteredByGradYear() {
+            var self = this;
+            if (!self.searchYear) {
+                return self.filteredByName;
+            } else {
+                return self.filteredByName.filter(function (student) {
+                    return student.grad_year.indexOf(self.searchYear) !== -1;
+                });
+            }
+        },
+        gradYears: function gradYears() {
+            var years = [];
+            if (this.students) {
+                this.students.forEach(function (student) {
+                    if (!years.includes(student.grad_year)) {
+                        years.push(student.grad_year);
+                    }
+                });
+            }
+            return years.sort();
         }
     }
 };
@@ -15044,7 +15071,7 @@ exports = module.exports = __webpack_require__(3)();
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 
 // exports
 
@@ -37233,7 +37260,20 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     domProps: {
       "textContent": _vm._s(_vm.student.name)
     }
-  })])]), _vm._v(" "), _c('div', {
+  }), _vm._v(" "), _c('p', {
+    directives: [{
+      name: "show",
+      rawName: "v-show",
+      value: (_vm.student.grad_year),
+      expression: "student.grad_year"
+    }],
+    staticClass: "subtitle is-6"
+  }, [_c('i', {
+    staticClass: "fa fa-graduation-cap",
+    attrs: {
+      "aria-hidden": "true"
+    }
+  }), _vm._v("\n                        " + _vm._s(_vm.student.grad_year) + "\n                    ")])])]), _vm._v(" "), _c('div', {
     staticClass: "content"
   }, [_c('div', [_vm._v("\n                    " + _vm._s(_vm.student.completed_sections) + " of " + _vm._s(_vm.student.total_sections) + " courses completed\n                    "), _c('progress', {
     staticClass: "progress is-medium",
@@ -37276,7 +37316,30 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     staticStyle: {
       "padding-top": "20px"
     }
-  }, [_c('div', {
+  }, [_c('p', {
+    staticClass: "control"
+  }, [_c('span', {
+    staticClass: "select"
+  }, [_c('select', {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: (_vm.searchYear),
+      expression: "searchYear"
+    }],
+    on: {
+      "change": function($event) {
+        _vm.searchYear = Array.prototype.filter.call($event.target.options, function(o) {
+          return o.selected
+        }).map(function(o) {
+          var val = "_value" in o ? o._value : o.value;
+          return val
+        })[0]
+      }
+    }
+  }, [_vm._m(0), _vm._v(" "), _vm._l((_vm.gradYears), function(year) {
+    return _c('option', [_vm._v(_vm._s(year))])
+  })], 2)])]), _vm._v(" "), _c('div', {
     directives: [{
       name: "show",
       rawName: "v-show",
@@ -37309,15 +37372,26 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }
   })]), _vm._v(" "), _c('div', {
     staticClass: "columns is-multiline is-mobile"
-  }, _vm._l((_vm.filteredStudents), function(student) {
+  }, _vm._l((_vm.filteredByGradYear), function(student) {
     return _c('student', {
       attrs: {
-        "number": _vm.filteredStudents.length,
+        "number": _vm.filteredByGradYear.length,
         "student": student
       }
     })
   }))])
-},staticRenderFns: []}
+},staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('option', {
+    attrs: {
+      "value": "0"
+    }
+  }, [_c('i', {
+    staticClass: "fa fa-filter",
+    attrs: {
+      "aria-hidden": "true"
+    }
+  }), _vm._v(" Graduation Year")])
+}]}
 module.exports.render._withStripped = true
 if (false) {
   module.hot.accept()
