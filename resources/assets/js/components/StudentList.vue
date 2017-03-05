@@ -27,7 +27,7 @@
             </div>
             <div class="level-right">
                 <div class="level-item" v-show="total_students > 0 && students.length == total_students">
-                    <a :href="'/api/groups/' + realm_id  + '/students/export'" v-on:click="downloadModal.show = true" class="button is-primary is-outlined">
+                    <a :href="'/api/groups/' + realm_id  + '/students/export'" v-on:click="downloadModal.show = true" class="button is-primary is-outlined" download>
                         <i class="fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;Export
                     </a>
                 </div>
