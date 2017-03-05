@@ -23,12 +23,13 @@
     </section>
     <section class="is-hero is-medium">
         <div class="hero-body">
+            <p>
+                To use Overview, you will need to create a new Schoology user (the Observer Account) that will need to be enrolled in all courses as an admin. Once the user is created, sign in as that user and generate new API access keys. You can do this in System Settings -> Integration. In the API Tab, click on Request API Keys. Once you've generated the API Keys, copy and paste them in the fields below.<br>
+                You do <strong>not</strong> need to enroll the Observer account into any courses as the Overview app will do this automatically.<br><br>
+            </p>
             <div class="level">
                 <div class="level-left">
                     <h3 class="level-item title is-3">Please enter your Schoology API Credentials</h3>
-                </div>
-                <div class="level-right">
-                    <a href="https://{{ session('schoology')['domain'] }}/system_settings/integration/api" target="_blank" class="level-item">Request your API Keys</a>
                 </div>
             </div>
             <div class="control is-horizontal">
@@ -69,7 +70,7 @@
                 </div>
                 <div class="level-item has-text-centered">
                     <div>
-                        <a class="title">Update Subscription</a>
+                        <p>To update your subscription, please email <a href="mailto:adriaan@engagenie.com?subject=Overview Subscription">adriaan@engagenie.com</a></p>
                     </div>
                 </div>
                 <div class="level-item has-text-centered">
@@ -81,7 +82,6 @@
             </div>
         </div>
     </section>
-    <pre>@{{ $data }}</pre>
 </div>
 @include('partials.phpvars')
 <script src="{{ mix('/js/config.js') }}"></script>
