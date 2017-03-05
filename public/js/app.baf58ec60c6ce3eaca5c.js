@@ -46030,7 +46030,8 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
   }, [_c('a', {
     staticClass: "button is-primary is-outlined",
     attrs: {
-      "href": '/api/groups/' + _vm.realm_id + '/students/export'
+      "href": '/api/groups/' + _vm.realm_id + '/students/export',
+      "download": ""
     },
     on: {
       "click": function($event) {
