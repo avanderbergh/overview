@@ -1,16 +1,38 @@
 <template>
     <div class="container" style="padding-top:20px;">
+        <div class="modal" :class="{'is-active': downloadModal.show}">
+            <div v-on:click="downloadModal.show = false" class="modal-background"></div>
+            <div class="modal-card">
+                <div class="modal-card-body has-text-centered">
+                    <p>The download will start automatically. Depending on the number of students and courses, the download might take a few minutes to start...</p>
+                </div>
+            </div>
+            <button v-on:click="downloadModal.show = false" class="modal-close"></button>
+        </div>
         <div v-show="userQuotaExceededNotification.show" class="notification is-warning">
             You've exceeded your user quota! Please ask your Schoology Administrator to add more users and reload the page.
         </div>
-        <p class="control">
-            <span class="select">
-                <select v-model="searchYear">
-                    <option value="0">Graduation Year</option>
-                    <option v-for="year in gradYears">{{ year }}</option>
-                </select>
-            </span>
-        </p>
+        <nav class="level">
+            <div class="level-left">
+                <div class="level-item">
+                    <p class="control">
+                        <span class="select">
+                            <select v-model="searchYear">
+                                <option value="0">Graduation Year</option>
+                                <option v-for="year in gradYears">{{ year }}</option>
+                            </select>
+                        </span>
+                    </p>
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item" v-show="total_students > 0 && students.length == total_students">
+                    <a :href="'/api/groups/' + realm_id  + '/students/export'" v-on:click="downloadModal.show = true" class="button is-primary is-outlined">
+                        <i class="fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;Export
+                    </a>
+                </div>
+            </div>
+        </nav>
         <div class="has-text-centered" v-show="total_students == 0" style="padding-top:15em;">
             <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
         </div>
@@ -32,15 +54,20 @@
         props: ['search'],
         data() {
             return {
+                realm_id: null,
                 searchYear: 0,
                 total_students: 0,
                 students: [],
                 userQuotaExceededNotification: {
                     show: false
+                },
+                downloadModal: {
+                   show: false
                 }
             }
         },
         mounted() {
+            this.realm_id = Overview.realm_id,
             this.getStudents();
             this.listen();
         },

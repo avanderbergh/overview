@@ -45409,14 +45409,11 @@ __webpack_require__(28);
 Vue.component('student-list', __webpack_require__(49));
 
 var app = new Vue({
-    el: '#app',
-    data: {
-        search: null,
-        gradYear: null,
-        downloadModal: {
-            show: false
-        }
-    }
+  el: '#app',
+  data: {
+    search: null,
+    gradYear: null
+  }
 });
 
 /***/ }),
@@ -45567,22 +45564,48 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = {
     props: ['search'],
     data: function data() {
         return {
+            realm_id: null,
             searchYear: 0,
             total_students: 0,
             students: [],
             userQuotaExceededNotification: {
                 show: false
+            },
+            downloadModal: {
+                show: false
             }
         };
     },
     mounted: function mounted() {
-        this.getStudents();
+        this.realm_id = Overview.realm_id, this.getStudents();
         this.listen();
     },
 
@@ -45683,7 +45706,7 @@ exports = module.exports = __webpack_require__(30)();
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 
 // exports
 
@@ -45935,6 +45958,25 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       "padding-top": "20px"
     }
   }, [_c('div', {
+    staticClass: "modal",
+    class: {
+      'is-active': _vm.downloadModal.show
+    }
+  }, [_c('div', {
+    staticClass: "modal-background",
+    on: {
+      "click": function($event) {
+        _vm.downloadModal.show = false
+      }
+    }
+  }), _vm._v(" "), _vm._m(0), _vm._v(" "), _c('button', {
+    staticClass: "modal-close",
+    on: {
+      "click": function($event) {
+        _vm.downloadModal.show = false
+      }
+    }
+  })]), _vm._v(" "), _c('div', {
     directives: [{
       name: "show",
       rawName: "v-show",
@@ -45942,7 +45984,13 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       expression: "userQuotaExceededNotification.show"
     }],
     staticClass: "notification is-warning"
-  }, [_vm._v("\n        You've exceeded your user quota! Please ask your Schoology Administrator to add more users and reload the page.\n    ")]), _vm._v(" "), _c('p', {
+  }, [_vm._v("\n        You've exceeded your user quota! Please ask your Schoology Administrator to add more users and reload the page.\n    ")]), _vm._v(" "), _c('nav', {
+    staticClass: "level"
+  }, [_c('div', {
+    staticClass: "level-left"
+  }, [_c('div', {
+    staticClass: "level-item"
+  }, [_c('p', {
     staticClass: "control"
   }, [_c('span', {
     staticClass: "select"
@@ -45969,7 +46017,32 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }
   }, [_vm._v("Graduation Year")]), _vm._v(" "), _vm._l((_vm.gradYears), function(year) {
     return _c('option', [_vm._v(_vm._s(year))])
-  })], 2)])]), _vm._v(" "), _c('div', {
+  })], 2)])])])]), _vm._v(" "), _c('div', {
+    staticClass: "level-right"
+  }, [_c('div', {
+    directives: [{
+      name: "show",
+      rawName: "v-show",
+      value: (_vm.total_students > 0 && _vm.students.length == _vm.total_students),
+      expression: "total_students > 0 && students.length == total_students"
+    }],
+    staticClass: "level-item"
+  }, [_c('a', {
+    staticClass: "button is-primary is-outlined",
+    attrs: {
+      "href": '/api/groups/' + _vm.realm_id + '/students/export'
+    },
+    on: {
+      "click": function($event) {
+        _vm.downloadModal.show = true
+      }
+    }
+  }, [_c('i', {
+    staticClass: "fa fa-file-excel-o",
+    attrs: {
+      "aria-hidden": "true"
+    }
+  }), _vm._v(" Export\n                ")])])])]), _vm._v(" "), _c('div', {
     directives: [{
       name: "show",
       rawName: "v-show",
@@ -46010,7 +46083,13 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       }
     })
   })), _vm._v(" "), _c('pre', [_vm._v(_vm._s(_vm.$data))])])
-},staticRenderFns: []}
+},staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('div', {
+    staticClass: "modal-card"
+  }, [_c('div', {
+    staticClass: "modal-card-body has-text-centered"
+  }, [_c('p', [_vm._v("The download will start automatically. Depending on the number of students and courses, the download might take a few minutes to start...")])])])
+}]}
 module.exports.render._withStripped = true
 if (false) {
   module.hot.accept()

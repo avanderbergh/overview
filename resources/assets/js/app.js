@@ -20,8 +20,5 @@ const app = new Vue({
     data: {
         search: null,
         gradYear: null,
-        downloadModal: {
-            show: false
-        }
     }
 });

@@ -2,32 +2,49 @@
 
 namespace App\Http\Controllers;
 
+use App\School;
 use App\Student;
 use Illuminate\Http\Request;
 use App\Jobs\GetStudentCompletions;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Avanderbergh\Schoology\SchoologyApi;
 use Avanderbergh\Schoology\Facades\Schoology;
-use App\School;
 
 class StudentsController extends Controller
 {
-    public function index($realm_id)
+    private function enrollObserverInAllCourses(SchoologyApi $schoology)
     {
-        Schoology::authorize();
-        $user_id = auth()->user()->id;
-        $school_id = session('schoology')['school_nid'];
-        $school = School::findOrFail($school_id);
-        $schoology = new SchoologyApi($school->api_key,$school->api_secret,null,null,null, true);
         $api_user = $schoology->apiResult('users/me');
-        $api_user_enrollments = $schoology->apiResult(sprintf('users/%s/sections', $api_user->uid));
+        $api_user_enrollments = [];
         $enrollments_array = [];
-        foreach ($api_user_enrollments->section as $enrollment){
+        $result = $schoology->apiResult(sprintf('users/%s/sections', $api_user->uid));
+        while (property_exists($result->links, 'next')){
+            $api_user_enrollments = array_merge($api_user_enrollments, $result->section);
+            $result = $schoology->apiResult(sprintf('users/%s/sections', $api_user->uid) . substr($result->links->next, strpos($result->links->next, '?')));
+        }
+        $api_user_enrollments = array_merge($api_user_enrollments, $result->section);
+
+        foreach ($api_user_enrollments as $enrollment){
             $enrollments_array[] = $enrollment->id;
         }
-        $courses = $schoology->apiResult('courses')->course;
+        $result = $schoology->apiResult('courses');
+        $courses = [];
+        while (property_exists($result->links, 'next')){
+            $courses = array_merge($courses, $result->course);
+            $result = $schoology->apiResult('courses' . substr($result->links->next, strpos($result->links->next, '?')));
+        }
+        $courses = array_merge($courses, $result->course);
+
         foreach ($courses as $course){
-            $sections = $schoology->apiResult(sprintf('courses/%s/sections', $course->id))->section;
+            $result = $schoology->apiResult(sprintf('courses/%s/sections', $course->id));
+            $sections = [];
+            while (property_exists($result->links, 'next')){
+                $sections = array_merge($sections, $result->section);
+                $result = $schoology->apiResult(sprintf('courses/%s/sections', $course->id)  . substr($result->links->next, strpos($result->links->next, '?')));
+            }
+            $sections = array_merge($sections, $result->section);
+
             foreach ($sections as $section){
                 if (!in_array($section->id, $enrollments_array)){
                     $body = ['uid' => $api_user->uid, 'admin' => 1, 'status' => 1];
@@ -37,6 +54,17 @@ class StudentsController extends Controller
                 }
             }
         }
+    }
+
+    public function index($realm_id)
+    {
+        Schoology::authorize();
+        $user_id = auth()->user()->id;
+        $school_id = session('schoology')['school_nid'];
+        $school = School::findOrFail($school_id);
+        $schoology = new SchoologyApi($school->api_key,$school->api_secret,null,null,null, true);
+
+        $this->enrollObserverInAllCourses($schoology);
 
         $result = $schoology->apiResult(sprintf('groups/%s/enrollments', $realm_id));
         $enrollments = [];
@@ -71,27 +99,17 @@ class StudentsController extends Controller
         Schoology::authorize();
         $school = School::findOrFail(session('schoology')['school_nid']);
         $schoology = new SchoologyApi($school->api_key,$school->api_secret,null,null,null, true);
-        $api_user = $schoology->apiResult('users/me');
-        $api_user_enrollments = $schoology->apiResult(sprintf('users/%s/sections', $api_user->uid));
-        $enrollments_array = [];
-        foreach ($api_user_enrollments->section as $enrollment){
-            $enrollments_array[] = $enrollment->id;
+        $this->enrollObserverInAllCourses($schoology);
+
+        $result = $schoology->apiResult(sprintf('groups/%s/enrollments', $realm_id));
+        $enrollments = [];
+        while(property_exists($result->links, 'next')){
+            $enrollments = array_merge($enrollments, $result->enrollment);
+            $result = $schoology->apiResult(sprintf('groups/%s/enrollments', $realm_id) . substr($result->links->next, strpos($result->links->next, '?')));
         }
-        $courses = $schoology->apiResult('courses')->course;
-        foreach ($courses as $course){
-            $sections = $schoology->apiResult(sprintf('courses/%s/sections', $course->id))->section;
-            foreach ($sections as $section){
-                if (!in_array($section->id, $enrollments_array)){
-                    $body = ['uid' => $api_user->uid, 'admin' => 1, 'status' => 1];
-                    if ($body){
-                        $schoology->apiResult(sprintf('sections/%s/enrollments', $section->id), 'POST', $body);
-                    }
-                }
-            }
-        }
+        $enrollments = array_merge($enrollments, $result->enrollment);
         $students = [];
         $student_details = [];
-        $enrollments = $schoology->apiResult(sprintf('groups/%s/enrollments', $realm_id))->enrollment;
         foreach ($enrollments as $enrollment){
             if (!$enrollment->admin && $enrollment->status == 1) {
                 $enrollment->sections = [];
@@ -165,5 +183,7 @@ class StudentsController extends Controller
                 $sheet->fromArray($student_details, null, 'A1', true);
             });
         })->download('xlsx');
+
+        return 'OK';
     }
 }
