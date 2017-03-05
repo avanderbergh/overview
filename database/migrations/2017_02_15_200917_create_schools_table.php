@@ -27,7 +27,7 @@ class CreateSchoolsTable extends Migration
             $table->string('api_key')->nullable();;
             $table->string('api_secret')->nullable();;
             $table->unsignedInteger('user_quota');
-            $table->timestamp('valid_until');
+            $table->date('valid_until');
             $table->timestamps();
         });
     }

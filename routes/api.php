@@ -15,3 +15,6 @@ use Illuminate\Http\Request;
 
 Route::get('/groups/{realm_id}/students', 'StudentsController@index');
 Route::get('/groups/{realm_id}/students/export', 'StudentsController@export');
+
+Route::get('schools', 'SchoolController@get');
+Route::post('schools/api-keys', 'SchoolController@setApiKeys');

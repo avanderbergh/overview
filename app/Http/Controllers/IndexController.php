@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use JavaScript;
+use App\School;
+use Carbon\Carbon;
 use Avanderbergh\Schoology\Facades\Schoology;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class IndexController extends Controller
 {
@@ -20,6 +23,16 @@ class IndexController extends Controller
             return "No Realm ID";
         }
         Schoology::authorize();
-        return view('app')->with('realm_id', $realm_id);
+        try {
+            $school = School::findOrFail(session('schoology')['school_nid']);
+        } catch (ModelNotFoundException $e){
+            return "School not found, please ask your Schoology Administrator to configure your School";
+        }
+        if (Carbon::createFromDate($school->vaild_until) < Carbon::now()){
+            return Carbon::createFromDate($school->valid_until).' '.Carbon::now();
+            return "Your school subscription has expired, please ask your Schoology Administrator to renew the subscription.";
+        } else {
+            return view('app')->with('realm_id', $realm_id);
+        }
     }
 }

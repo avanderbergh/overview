@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Avanderbergh\Schoology\SchoologyApi;
 use Storage;
+use App\School;
 
 /**
  * Class GetStudentCompletions
@@ -19,6 +20,7 @@ class GetStudentCompletions implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    private $school_id;
     private $user_id;
     private $realm_id;
     private $enrollment;
@@ -29,9 +31,10 @@ class GetStudentCompletions implements ShouldQueue
      * @param $realm_id
      * @param $enrollment
      */
-    public function __construct($user_id, $realm_id, $enrollment)
+    public function __construct($school_id, $user_id, $realm_id, $enrollment)
     {
 
+        $this->school_id = $school_id;
         $this->user_id = $user_id;
         $this->realm_id = $realm_id;
         $this->enrollment = $enrollment;
@@ -45,7 +48,8 @@ class GetStudentCompletions implements ShouldQueue
     public function handle()
     {
         $this->enrollment->sections = [];
-        $schoology = new SchoologyApi('48bb142fedc4be0b27e459fd41f59438058930366','b3d5cb7b044875606f48f70918d240a7',null,null,null, true);
+        $school = School::findOrFail($this->school_id);
+        $schoology = new SchoologyApi($school->api_key,$school->api_secret,null,null,null, true);
         $user = $schoology->apiResult(sprintf('users/%s', $this->enrollment->uid));
         $sections = $schoology->apiResult(sprintf('users/%s/sections', $this->enrollment->uid))->section;
         $total_sections = sizeof($sections);

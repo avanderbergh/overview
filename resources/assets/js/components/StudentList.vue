@@ -1,5 +1,8 @@
 <template>
     <div class="container" style="padding-top:20px;">
+        <div v-show="userQuotaExceededNotification.show" class="notification is-warning">
+            You've exceeded your user quota! Please ask your Schoology Administrator to add more users and reload the page.
+        </div>
         <p class="control">
             <span class="select">
                 <select v-model="searchYear">
@@ -8,7 +11,7 @@
                 </select>
             </span>
         </p>
-        <div class="has-text-centered" v-show="total_students < 1" style="padding-top:15em;">
+        <div class="has-text-centered" v-show="total_students == 0" style="padding-top:15em;">
             <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
         </div>
         <div class="box has-text-centered" v-show="total_students > 0 && students.length < total_students">
@@ -18,6 +21,7 @@
         <div class="columns is-multiline is-mobile">
             <student :number="filteredByGradYear.length" :student="student" v-for="student in filteredByGradYear"></student>
         </div>
+        <pre>{{$data}}</pre>
     </div>
 </template>
 <style>
@@ -31,6 +35,9 @@
                 searchYear: 0,
                 total_students: 0,
                 students: [],
+                userQuotaExceededNotification: {
+                    show: false
+                }
             }
         },
         mounted() {
@@ -42,7 +49,13 @@
                 var that = this;
                 axios.get('/api/groups/'+Overview.realm_id+'/students')
                 .then(function (response) {
-                    that.total_students = response.data;
+                    if (response.data == -1) {
+                        console.log('User Quota Exceeded');
+                        that.userQuotaExceededNotification.show = true;
+                        that.total_students = response.data;
+                    } else {
+                        that.total_students = response.data;
+                    }
                 })
             },
             listen() {

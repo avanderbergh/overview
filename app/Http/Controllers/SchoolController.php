@@ -9,10 +9,11 @@ use Avanderbergh\Schoology\Facades\Schoology;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use JavaSript;
 
 class SchoolController extends Controller
 {
-    public function show(Request $request)
+    public function show()
     {
         Schoology::Authorize();
         $sgy_user = Schoology::apiResult('users/me');
@@ -23,7 +24,7 @@ class SchoolController extends Controller
 //            Create the School
             $school = School::create([
                 'id' => $sgy_school->id,
-                'title' => $sgy_school->id,
+                'title' => $sgy_school->title,
                 'address1' => $sgy_school->address1,
                 'address2' => $sgy_school->address2,
                 'city' => $sgy_school->city,
@@ -53,6 +54,30 @@ class SchoolController extends Controller
             $admin->save();
             $admin = Admin::find($sgy_user->id);
         }
+        \JavaScript::put([
+            'school' => $school,
+            'admin' => $admin,
+        ]);
         return view('config');
     }
+
+    public function get()
+    {
+        Schoology::authorize();
+        $me = Schoology::apiResult('users/me');
+        $school = School::findOrFail($me->school_id);
+        return $school;
+    }
+
+    public function setApiKeys(Request $request)
+    {
+        Schoology::authorize();
+        $me = Schoology::apiResult('users/me');
+        $school = School::findOrFail($me->school_id);
+        $school->api_key = $request->api_key;
+        $school->api_secret = $request->api_secret;
+        $school->save();
+        return $school;
+    }
+
 }

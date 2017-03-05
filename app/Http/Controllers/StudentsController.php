@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Student;
 use Illuminate\Http\Request;
 use App\Jobs\GetStudentCompletions;
 use Maatwebsite\Excel\Facades\Excel;
 use Avanderbergh\Schoology\SchoologyApi;
 use Avanderbergh\Schoology\Facades\Schoology;
+use App\School;
 
 class StudentsController extends Controller
 {
@@ -14,7 +16,9 @@ class StudentsController extends Controller
     {
         Schoology::authorize();
         $user_id = auth()->user()->id;
-        $schoology = new SchoologyApi('48bb142fedc4be0b27e459fd41f59438058930366','b3d5cb7b044875606f48f70918d240a7',null,null,null, true);
+        $school_id = session('schoology')['school_nid'];
+        $school = School::findOrFail($school_id);
+        $schoology = new SchoologyApi($school->api_key,$school->api_secret,null,null,null, true);
         $api_user = $schoology->apiResult('users/me');
         $api_user_enrollments = $schoology->apiResult(sprintf('users/%s/sections', $api_user->uid));
         $enrollments_array = [];
@@ -34,13 +38,29 @@ class StudentsController extends Controller
             }
         }
 
-        $enrollments = $schoology->apiResult(sprintf('groups/%s/enrollments', $realm_id))->enrollment;
+        $result = $schoology->apiResult(sprintf('groups/%s/enrollments', $realm_id));
+        $enrollments = [];
+        while(property_exists($result->links, 'next')){
+            $enrollments = array_merge($enrollments, $result->enrollment);
+            $result = $schoology->apiResult(sprintf('groups/%s/enrollments', $realm_id) . substr($result->links->next, strpos($result->links->next, '?')));
+        }
+        $enrollments = array_merge($enrollments, $result->enrollment);
         $total_students = 0;
         foreach ($enrollments as $enrollment){
             if (!$enrollment->admin && $enrollment->status == 1) {
-                $job = (new GetStudentCompletions($user_id, $realm_id, $enrollment))->onQueue('students');
-                dispatch($job);
-                $total_students++;
+                Student::firstOrCreate([
+                    'id' => $enrollment->uid,
+                    'school_id' => $school_id,
+                    'name_display' => $enrollment->name_display
+                ]);
+                $school_students = Student::where('school_id', $school_id)->count();
+                if ($school_students <= $school->user_quota) {
+                    $job = (new GetStudentCompletions($school_id, $user_id, $realm_id, $enrollment))->onQueue('students');
+                    dispatch($job);
+                    $total_students++;
+                } else {
+                    return -1;
+                }
             }
         }
         return $total_students;
@@ -49,7 +69,8 @@ class StudentsController extends Controller
     public function export($realm_id)
     {
         Schoology::authorize();
-        $schoology = new SchoologyApi('48bb142fedc4be0b27e459fd41f59438058930366','b3d5cb7b044875606f48f70918d240a7',null,null,null, true);
+        $school = School::findOrFail(session('schoology')['school_nid']);
+        $schoology = new SchoologyApi($school->api_key,$school->api_secret,null,null,null, true);
         $api_user = $schoology->apiResult('users/me');
         $api_user_enrollments = $schoology->apiResult(sprintf('users/%s/sections', $api_user->uid));
         $enrollments_array = [];
@@ -69,6 +90,7 @@ class StudentsController extends Controller
             }
         }
         $students = [];
+        $student_details = [];
         $enrollments = $schoology->apiResult(sprintf('groups/%s/enrollments', $realm_id))->enrollment;
         foreach ($enrollments as $enrollment){
             if (!$enrollment->admin && $enrollment->status == 1) {
@@ -121,14 +143,26 @@ class StudentsController extends Controller
                     if ($completion->completed && $section_grades_total == $section_grades_completed){
                         $student['completed_sections']++;
                     }
+                    $student_details[]=[
+                        'Student Name' =>  htmlspecialchars_decode($enrollment->name_display, ENT_QUOTES),
+                        'Course' => $section->course_title,
+                        'Section' => $section->section_title,
+                        'Total Rules' => $completion->total_rules,
+                        'Completed Rules' => $completion->completed_rules,
+                        'Total Grades' => $section_grades_total,
+                        'Completed Grades' => $section_grades_completed,
+                    ];
                 }
                 $students[] = $student;
             }
         }
 
-        Excel::create('Overview', function($excel) use ($students){
+        Excel::create('Overview', function($excel) use ($students, $student_details){
             $excel->sheet('Completions', function($sheet) use ($students){
                 $sheet->fromArray($students, null, 'A1', true);
+            });
+            $excel->sheet('Details', function($sheet) use ($student_details){
+                $sheet->fromArray($student_details, null, 'A1', true);
             });
         })->download('xlsx');
     }
