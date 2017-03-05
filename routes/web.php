@@ -15,5 +15,6 @@ Route::get('/', function () {
     return redirect('https://engagenie.com');
 });
 Route::get('app', 'IndexController@index');
+Route::get('cookie-preload', 'IndexController@cookie_preload');
 
 Route::get('config', 'SchoolController@show');

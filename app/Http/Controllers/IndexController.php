@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use JavaScript;
 use App\School;
 use Carbon\Carbon;
+use Illuminate\Http\Response;
 use Avanderbergh\Schoology\Facades\Schoology;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -36,5 +37,25 @@ class IndexController extends Controller
         } else {
             return view('app')->with('realm_id', $realm_id);
         }
+    }
+
+    public function cookie_preload()
+    {
+        $html = '
+            <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+            <html xmlns="http://www.w3.org/1999/xhtml">
+                <head>
+                    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+                    <title>Loading App...</title>
+                </head>
+                <body>
+                    <p>Loading application...</p>
+                    <script type="text/javascript">
+                        self.close();
+                    </script>
+                </body>
+            </html>';
+        $response = new Response($html);
+        return $response->withCookie(cookie('name', 'value', 5));
     }
 }
