@@ -28,8 +28,7 @@ class IndexController extends Controller
         } catch (ModelNotFoundException $e){
             return "School not found, please ask your Schoology Administrator to configure your School";
         }
-        if (Carbon::createFromDate($school->vaild_until) < Carbon::now()){
-            return Carbon::createFromDate($school->valid_until).' '.Carbon::now();
+        if (Carbon::parse($school->valid_until) < Carbon::today()){
             return "Your school subscription has expired, please ask your Schoology Administrator to renew the subscription.";
         } else {
             return view('app')->with('realm_id', $realm_id);
