@@ -43,7 +43,6 @@
         <div class="columns is-multiline is-mobile">
             <student :number="filteredByGradYear.length" :student="student" v-for="student in filteredByGradYear"></student>
         </div>
-        <pre>{{$data}}</pre>
     </div>
 </template>
 <style>
