@@ -28,7 +28,7 @@ class StudentsController extends Controller
         foreach ($api_user_enrollments as $enrollment){
             $enrollments_array[] = $enrollment->id;
         }
-        dd($enrollments_array);
+        $enrollments_array;
         $result = $schoology->apiResult('courses');
         $courses = [];
         while (property_exists($result->links, 'next')){
@@ -50,8 +50,11 @@ class StudentsController extends Controller
                 if (!in_array($section->id, $enrollments_array)){
                     $body = ['uid' => $api_user->uid, 'admin' => 1, 'status' => 1];
                     if ($body){
-                        $schoology->apiResult(sprintf('sections/%s/enrollments', $section->id), 'POST', $body);
-                    }
+                        try {
+                            $schoology->apiResult(sprintf('sections/%s/enrollments', $section->id), 'POST', $body);
+                        } catch (\Exception $e){
+                        }
+                     }
                 }
             }
         }
