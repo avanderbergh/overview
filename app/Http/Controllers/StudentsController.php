@@ -28,6 +28,7 @@ class StudentsController extends Controller
         foreach ($api_user_enrollments as $enrollment){
             $enrollments_array[] = $enrollment->id;
         }
+        dd($enrollments_array);
         $result = $schoology->apiResult('courses');
         $courses = [];
         while (property_exists($result->links, 'next')){
