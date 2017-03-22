@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Avanderbergh\Schoology\SchoologyApi;
 use Avanderbergh\Schoology\Facades\Schoology;
+use Illuminate\Support\Facades\DB;
 
 class StudentsController extends Controller
 {
