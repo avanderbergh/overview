@@ -28,7 +28,7 @@ class StudentsController extends Controller
         foreach ($api_user_enrollments as $enrollment){
             $enrollments_array[] = $enrollment->id;
         }
-        $enrollments_array;
+
         $result = $schoology->apiResult('courses');
         $courses = [];
         while (property_exists($result->links, 'next')){
@@ -36,7 +36,7 @@ class StudentsController extends Controller
             $result = $schoology->apiResult('courses' . substr($result->links->next, strpos($result->links->next, '?')));
         }
         $courses = array_merge($courses, $result->course);
-
+        dd($courses);
         foreach ($courses as $course){
             $result = $schoology->apiResult(sprintf('courses/%s/sections', $course->id));
             $sections = [];
@@ -68,7 +68,7 @@ class StudentsController extends Controller
         $school = School::findOrFail($school_id);
         $schoology = new SchoologyApi($school->api_key,$school->api_secret,null,null,null, true);
 
-        // $this->enrollObserverInAllCourses($schoology);
+        $this->enrollObserverInAllCourses($schoology);
 
         $result = $schoology->apiResult(sprintf('groups/%s/enrollments', $realm_id));
         $enrollments = [];
