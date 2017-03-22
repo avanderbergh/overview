@@ -48,9 +48,11 @@ class StudentsController extends Controller
 
             foreach ($sections as $section){
                 if (!in_array($section->id, $enrollments_array)){
+                    DB::reconnect();
                     $body = ['uid' => $api_user->uid, 'admin' => 1, 'status' => 1];
                     if ($body){
                         try {
+                            Log::info('Enrolling - '.$section);
                             $schoology->apiResult(sprintf('sections/%s/enrollments', $section->id), 'POST', $body);
                         } catch (\Exception $e){
                             Log::warning('Failed to create enrollments for: '.$section);
