@@ -11,6 +11,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Avanderbergh\Schoology\SchoologyApi;
 use Avanderbergh\Schoology\Facades\Schoology;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class StudentsController extends Controller
 {
