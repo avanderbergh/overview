@@ -73,7 +73,7 @@ class StudentsController extends Controller
         $school = School::findOrFail($school_id);
         $schoology = new SchoologyApi($school->api_key,$school->api_secret,null,null,null, true);
 
-        $this->enrollObserverInAllCourses($schoology);
+        // $this->enrollObserverInAllCourses($schoology);
 
         $result = $schoology->apiResult(sprintf('groups/%s/enrollments', $realm_id));
         $enrollments = [];
