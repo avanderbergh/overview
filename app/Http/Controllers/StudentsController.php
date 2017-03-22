@@ -36,7 +36,7 @@ class StudentsController extends Controller
             $result = $schoology->apiResult('courses' . substr($result->links->next, strpos($result->links->next, '?')));
         }
         $courses = array_merge($courses, $result->course);
-        dd($courses);
+
         foreach ($courses as $course){
             $result = $schoology->apiResult(sprintf('courses/%s/sections', $course->id));
             $sections = [];
@@ -53,6 +53,7 @@ class StudentsController extends Controller
                         try {
                             $schoology->apiResult(sprintf('sections/%s/enrollments', $section->id), 'POST', $body);
                         } catch (\Exception $e){
+                            Log::warning('Failed to create enrollments for: '.$section);
                         }
                      }
                 }
