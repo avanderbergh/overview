@@ -108,8 +108,6 @@ class StudentsController extends Controller
         Schoology::authorize();
         $school = School::findOrFail(session('schoology')['school_nid']);
         $schoology = new SchoologyApi($school->api_key,$school->api_secret,null,null,null, true);
-        $this->enrollObserverInAllCourses($schoology);
-
         $result = $schoology->apiResult(sprintf('groups/%s/enrollments', $realm_id));
         $enrollments = [];
         while(property_exists($result->links, 'next')){
@@ -160,10 +158,10 @@ class StudentsController extends Controller
                         if ($grade->category_id) {
                             $student['total_grades']++;
                             $section_grades_total++;
-                        }
-                        if ($grade->grade) {
-                            $student['completed_grades']++;
-                            $section_grades_completed++;
+                            if ($grade->grade) {
+                                $student['completed_grades']++;
+                                $section_grades_completed++;
+                            }
                         }
                     }
 
