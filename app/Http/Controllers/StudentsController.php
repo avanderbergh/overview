@@ -127,7 +127,7 @@ class StudentsController extends Controller
                     'id' => $enrollment->uid,
                     'name' => htmlspecialchars_decode($enrollment->name_display, ENT_QUOTES),
                     'grad_year' => $user->grad_year,
-                    'total_sections' => sizeof($sections),
+                    'total_sections' => 0,
                     'completed_sections' => 0,
                     'total_grades' => 0,
                     'completed_grades' => 0,
@@ -135,48 +135,52 @@ class StudentsController extends Controller
                     'completed_rules' =>0
                 ];
                 foreach ($sections as $section) {
-//                get the completion rules
+                    // Get the student enrollment
                     try {
-                        $completion = $schoology->apiResult(sprintf('sections/%s/completion/user/%s', $section->id, $enrollment->uid));
+                        $student_enrollment= $schoology->apiResult(sprintf('sections/%s/enrollments?uid=%s', $section->id, $enrollment->uid))->enrollment[0];
                     } catch (\Exception $e){
-                    }
-                    $student['total_rules'] += $completion->total_rules;
-                    $student['completed_rules'] += $completion->completed_rules;
-//            Get the enrollment ID
-                    try {
-                        $enrollment_id = $schoology->apiResult(sprintf('sections/%s/enrollments?uid=%s', $section->id, $enrollment->uid))->enrollment[0]->id;
-                    } catch (\Exception $e){
-                    }
-//            Get the grades
-                    try {
-                        $grades = $schoology->apiResult(sprintf('sections/%s/grades?enrollment_id=%s',$section->id, $enrollment_id))->grades;
-                    } catch (\Exception $e){
-                    }
-                    $section_grades_total = 0;
-                    $section_grades_completed = 0;
-                    foreach ($grades->grade as $grade){
-                        if ($grade->category_id) {
-                            $student['total_grades']++;
-                            $section_grades_total++;
-                            if ($grade->grade) {
-                                $student['completed_grades']++;
-                                $section_grades_completed++;
-                            }
-                        }
                     }
 
-                    if ($completion->completed && $section_grades_total == $section_grades_completed){
-                        $student['completed_sections']++;
+                    if ($student_enrollment->status == 1) {
+                        $student['total_sections']++;
+                        // Get the completion rules
+                        try {
+                            $completion = $schoology->apiResult(sprintf('sections/%s/completion/user/%s', $section->id, $enrollment->uid));
+                        } catch (\Exception $e){
+                        }
+                        $student['total_rules'] += $completion->total_rules;
+                        $student['completed_rules'] += $completion->completed_rules;
+                        // Get the grades
+                        try {
+                            $grades = $schoology->apiResult(sprintf('sections/%s/grades?enrollment_id=%s',$section->id, $student_enrollment->id))->grades;
+                        } catch (\Exception $e){
+                        }
+                        $section_grades_total = 0;
+                        $section_grades_completed = 0;
+                        foreach ($grades->grade as $grade){
+                            if ($grade->category_id) {
+                                $student['total_grades']++;
+                                $section_grades_total++;
+                                if ($grade->grade) {
+                                    $student['completed_grades']++;
+                                    $section_grades_completed++;
+                                }
+                            }
+                        }
+
+                        if ($completion->completed && $section_grades_total == $section_grades_completed){
+                            $student['completed_sections']++;
+                        }
+                        $student_details[]=[
+                            'Student Name' =>  htmlspecialchars_decode($enrollment->name_display, ENT_QUOTES),
+                            'Course' => $section->course_title,
+                            'Section' => $section->section_title,
+                            'Total Rules' => $completion->total_rules,
+                            'Completed Rules' => $completion->completed_rules,
+                            'Total Grades' => $section_grades_total,
+                            'Completed Grades' => $section_grades_completed,
+                        ];
                     }
-                    $student_details[]=[
-                        'Student Name' =>  htmlspecialchars_decode($enrollment->name_display, ENT_QUOTES),
-                        'Course' => $section->course_title,
-                        'Section' => $section->section_title,
-                        'Total Rules' => $completion->total_rules,
-                        'Completed Rules' => $completion->completed_rules,
-                        'Total Grades' => $section_grades_total,
-                        'Completed Grades' => $section_grades_completed,
-                    ];
                 }
                 $students[] = $student;
             }
