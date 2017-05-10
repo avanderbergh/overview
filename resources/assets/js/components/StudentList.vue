@@ -27,8 +27,13 @@
             </div>
             <div class="level-right">
                 <div class="level-item" v-show="total_students > 0 && students.length == total_students">
-                    <a :href="'/api/groups/' + realm_id  + '/students/export'" v-on:click="downloadModal.show = true" class="button is-primary is-outlined" download>
-                        <i class="fa fa-file-excel-o" aria-hidden="true"></i>&nbsp;Export
+                    <a href="#" v-on:click="exportDetails(students)" class="button is-primary is-outlined">
+                        <i class="fa fa-file-o" aria-hidden="true"></i>&nbsp;Export Details
+                    </a>
+                </div>
+                <div class="level-item" v-show="total_students > 0 && students.length == total_students">
+                    <a href="#" v-on:click="exportSummary(students)" class="button is-primary is-outlined">
+                        <i class="fa fa-file-o" aria-hidden="true"></i>&nbsp;Export Summary
                     </a>
                 </div>
             </div>
@@ -89,6 +94,26 @@
                     .listen('GotStudentCompletions', event => {
                         this.students.push(event.enrollment);
                     });
+            },
+            exportDetails(students) {
+                var csvContent = "data:text/csv;charset=utf-8,";
+                csvContent += 'id,name,graduation year,course title,section title,completed rules,total rules,completed grades,total grades,course completed\n';
+                students.forEach(function(student,i1){
+                    student.sections.forEach(function(section,i2){
+                        csvContent += student.id + ',' + student.name + ',' + student.grad_year + ',' + section.course_title + ',' + section.section_title + ',' + section.completions.completed_rules + ',' + section.completions.total_rules + ',' + section.grades.completed_grades + ',' + section.grades.total_grades + ',' + section.completed + '\n';
+                    });
+                });
+                var encodedUri = encodeURI(csvContent);
+                window.open(encodedUri);
+            },
+            exportSummary(students) {
+                var csvContent = "data:text/csv;charset=utf-8,";
+                csvContent += 'id,name,graduation year,completed sections,total sections\n';
+                students.forEach(function(student,i1){
+                    csvContent += student.id + ',' + student.name + ',' + student.grad_year + ',' + student.completed_sections + ',' + student.total_sections + '\n';
+                });
+                var encodedUri = encodeURI(csvContent);
+                window.open(encodedUri);
             }
         },
         components:{
