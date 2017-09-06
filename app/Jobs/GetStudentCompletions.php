@@ -115,7 +115,7 @@ class GetStudentCompletions implements ShouldQueue
                 $total_grades = 0;
                 $completed_grades = 0;
                 foreach ($grades->grade as $grade){
-                    if ($grade->category_id) {
+                    if ($grade->category_id && $grade->exception != 1) {
                         $total_grades++;
                         if ($grade->grade) {
                             $completed_grades++;
